@@ -9,7 +9,7 @@
    start() -> start(100).  % default value for max is 100
    start(Max) -> 
        io:format("  Loading ~w numbers into matrix (+N) \n ", [ Max ] ),
-       Lid = spawn_link( primes, linda, [Max, [], [] ]),
+       Lid = spawn_link( primes, linda, [Max, [], [] ]),  %primes module, linda func, params
        Sqrt = round(math:sqrt(Max)+0.5),  
        io:format(" Sqrt(~w) + 1 = ~w \n " , [Max,Sqrt] ),  
        io:format(" Tuple space is started ~n ",[]),  
@@ -45,13 +45,17 @@
        spawn_sieves( Max, Inc+1, Lid, Sqrt ).
 
    put_it(Max, N, Lid) when N =< 1 ->
+       io:format(" && we hurr &&", []),
        Sqrt = round(math:sqrt(Max)+0.5),
+       io:format(" *& ~w &*", [Lid]),
        spawn_sieves( Max, 2, Lid, Sqrt );  
 
    put_it(Max, N,Lid) when N > 1 ->
        receive
        after 0 ->
+	   io:format(" ** ~w **", [N]),
            Lid ! {put, N, N},
+
            if 
                N rem 1000 == 0 ->
                    io:format(" +~w ", [N]);
@@ -104,18 +108,23 @@
    linda(Max, Keys, Pids) ->
        receive
        {put, pid, Pid} ->
+           io:format(" $$ ~w, ~w, ~w $$~n",[put,pid, Pids]),
            linda(Max, Keys, Pids++[Pid]);
        {put, Name, Value} ->
+           io:format(" $$$ ~w, ~w $$$~n", [Name, Value]),
            put( Name, Value),
            linda(Max, Keys++[Name], Pids);
        {From, get, Name} ->
+           io:format(" @@ ~w, ~w, ~w @@~n", [From, get, Name]),
            From ! {lindagram, get( Name)},
            erase( Name ),                          % get is a destructive read  
            linda(Max, Keys--[Name],Pids);
        {From, get, all, pids} ->
+           io:format(" @@@ ~w, ~w, ~w, ~w @@@~n", [From, get, all, pids]),  
            From ! {lindagram, pids, Pids},
            linda(Max, Keys, Pids );
        {From, get, pid, Pid} ->
+           io:format(" @@@@ ~w, ~w, ~w, ~w @@@@~n", [From, get, pid, Pid]),
            L1 = length( Pids ),
            L2 = length( Pids -- [Pid]),
            if 
