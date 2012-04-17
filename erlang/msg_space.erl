@@ -31,8 +31,14 @@ runsimulation() ->
 	Posts ! {status},
 
 	Posts ! {remove, {matthew , "Hello, world1"}},
+	Posts ! {remove, {abhishek, "Welcome1"}},
 
 	Posts ! {status},
+
+	Posts ! {retrieve, {abhishek}},
+	Posts ! {retrieve, {matthew }},
+
+	Posts ! {exit},
 
 	io:format(" - Simulation Completed - ~n", []).
 
@@ -51,13 +57,17 @@ messagespace(Messages) ->
 	    	  messagespace(Messages++[{User,Message}]);
 
 	    {remove, {User, Message} } ->
-	     	  io:format(" ~w ~n ", [Messages]),
+%	     	  io:format(" ~w ~n ", [Messages]),
 		  messagespace(Messages--[{User,Message}]);
 
 	    {retrieve, {User} } ->
-	    	  io:format("~w posted the following messages: ~n~w", [User,[X || {User, X} <- Messages]]);
+	    	  io:format("~w posted the following messages: ~n~w~n~n", [User,[X || {Y, X} <- Messages, Y =:= User]]),
+		  messagespace(Messages);
 
 	    {status} ->
-	    	  io:format("~nMessages: ~w ~n~n~n", [Messages])
+	    	  io:format("~nAll Messages: ~w ~n~n", [Messages]),
+		  messagespace(Messages);
+
+	    {exit} -> done
 
 	    end.
