@@ -4,7 +4,7 @@
 %% -export([messagespace/3]).
 %% -compile([debug_info,export_all]).
 %% -compile(export_all).
--export([go/0, intro/0, runsimulation/0,messagespace/1,updateone/4,updatetwo/1,updatethree/1]).
+-export([go/0,messagespace/1,fireupdates/4]).
 
 -author("Saksena,Mancuso").
 
@@ -18,43 +18,53 @@ intro() ->
 
 runsimulation() ->
         Messagedb = spawn_link (msg_space, messagespace, [ [] ]),
-	%register (Posts, Messagedb), 
-%	Posts ! {post, {abhishek, "Welcome1"}},
-%	Posts ! {post, {abhishek, "Welcome2"}},
-%	Posts ! {post, {abhishek, "Welcome3"}},
-%	Posts ! {post, {abhishek, "Welcome4"}},
-%	Posts ! {post, {matthew , "Hello, world1"}},
-%	Posts ! {post, {matthew , "Hello, world2"}},
-%	Posts ! {post, {matthew , "Hello, world3"}},
-%	Posts ! {post, {matthew , "Hello, world4"}},
 
-	spawn(fireupdates(lerner, 1, 10, Messagedb)),
-	spawn(fireupdates(lerner, 11, 20, Messagedb)),
-	spawn(fireupdates(lerner, 21, 30, Messagedb)),
+	spawn( msg_space, fireupdates, [abhishek, 32,  82, Messagedb] ),
+	spawn( msg_space, fireupdates, [matthew , 52, 102, Messagedb] ),
+	spawn( msg_space, fireupdates, [draper  , 76, 126, Messagedb] ),
+	spawn( msg_space, fireupdates, [durden  , 46,  96, Messagedb] ),
+	spawn( msg_space, fireupdates, [bond    , 60, 110, Messagedb] ),
+	spawn( msg_space, fireupdates, [bourne  , 68, 118, Messagedb] ),
 
-	Messagedb ! {status},
+	io:format(" - Updates Spawned - ~n", []),
 
-	Messagedb ! {remove, {matthew , "Hello, world1"}},
-	Messagedb ! {remove, {abhishek, "Welcomee1"}},
+	takelong(1,10000000),
 
 	Messagedb ! {status},
 
 	Messagedb ! {retrieve, {abhishek}},
 	Messagedb ! {retrieve, {matthew }},
-	Messagedb ! {retrieve, {lerner  }},
+	Messagedb ! {retrieve, {bourne  }},
 
 	Messagedb ! {exit},
 
 	io:format(" - Simulation Completed - ~n", []).
 
+%% Empty loop
+%% Used to stall while firing updates
+takelong(End, End) -> done;
+takelong(Start, End) ->
+	takelong(Start+1,End).
 
-fireupdates(_User, End,   End, _Messagedb) -> done;
+%% Send out updates, and removals
+fireupdates(User, End,   End, Messagedb) -> 
+	undoupdates(User, End-50, End, Messagedb);
 fireupdates(User, Count, End, Messagedb) ->
-	recieve {User, Count, End, Messagedb}
-	% Welcome + Count
-	Messagedb ! {post, {User, [87,101,108,99,111,109,101,Count]}},
-	updateone(User, Count+1, End, Messagedb).
+	receive 
+	after 0 ->
+	      % Welcome + Count
+	      Messagedb ! {post, {User, [87,101,108,99,111,109,101,95,Count]}},
+	      fireupdates(User, Count+1, End, Messagedb)
+	end.
 
+undoupdates(_User, End,   End, _Messagedb) -> done;
+undoupdates(User, Count, End, Messagedb) ->
+	receive 
+	after 0 ->
+	      % Welcome + Count
+	      Messagedb ! {remove, {User, [87,101,108,99,111,109,101,95,Count]}},
+	      undoupdates(User, Count+2, End, Messagedb)
+	end.
 
 %% messagespace -- The underlying Tuple Space
 %% -> Add a message ( {User, Message} ), 
@@ -75,11 +85,11 @@ messagespace(Messages) ->
 		  messagespace(Messages--[{User,Message}]);
 
 	    {retrieve, {User} } ->
-	    	  io:format("~w posted the following messages: ~n~w~n~n", [User,[X || {Y, X} <- Messages, Y =:= User]]),
+	    	  io:format("~w posted the following messages: ~n~p~n~n", [User,[X || {Y, X} <- Messages, Y =:= User]]),
 		  messagespace(Messages);
 
 	    {status} ->
-   	  	  io:format("~nAll Messages: ~w ~n~n", [Messages]),
+   	  	  io:format("~nAll Messages: ~p ~n~n", [Messages]),
 		  messagespace(Messages);
 
 	    {exit} -> done
