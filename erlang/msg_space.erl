@@ -1,23 +1,34 @@
 -module(msg_space).
 
 %% Come back and specify which to export
--compile([debug_info,export_all]).
-%% -compile(export_all).
-%% -export( ).
+%% -export([messagespace/3]).
+%% -compile([debug_info,export_all]).
+-compile(export_all).
+
 
 -author("Saksena,Mancuso").
 
 intro() ->
-	io.format("Abhishek Saksena,~nMatthew Mancuso~n"),
-	io.format("Distributed Computing -- Spring 2012, Lerner~n").
+	io:format("Abhishek Saksena,~nMatthew Mancuso~n"),
+	io:format("Distributed Computing -- Spring 2012, Lerner~n").
 
 
-%% The Tuple Space
+%% messagespace -- The underlying Tuple Space
+%% -> Add a message ( {User, Message} ), 
+%% -> Remove a message ( {User, Message} ),
+%% -> Collect messages member ( {User} )
 
-tspace(Max, Keys, Pids) ->
-	    recieve
+messagespace(Messages) ->
+	    receive
 
 	    % Formats in which we can recieve messages
-	    {put, pid, Pid} ->
-	    	  tspace(Max, Keys, Pids++[Pid]);
-	    
+	    {post, {User, Message} } ->
+	    	  messagespace(Messages++[{User,Message}]);
+
+	    {remove, {User, Message} } ->
+	    	  messagespace(Messages--[{User,Message}]);
+
+	    {retrieve, {User} } ->
+	    	  io:format("~w posted the following messages: ~n~w", [User,[X || {User, X} <- Messages]])
+
+	    end.
