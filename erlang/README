@@ -2,3 +2,4 @@ To run from command line:
 
 >> erl -compile msg_space.erl
 >> erl -noshell -s msg_space go -s init stop
+
