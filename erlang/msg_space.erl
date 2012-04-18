@@ -31,6 +31,9 @@ runsimulation() ->
 	takelong(1,10000000),
 
 	Messagedb ! {status},
+	bringitbackmofuqaa(bourne, "Welcome_E", Messagedb),
+
+	Messagedb ! {status},
 
 %	Messagedb ! {retrieve, {abhishek}},
 %	Messagedb ! {retrieve, {matthew }},
@@ -66,6 +69,15 @@ undoupdates(User, Count, End, Messagedb) ->
 	      undoupdates(User, Count+2, End, Messagedb)
 	end.
 
+%% Test destructive read
+bringitbackmofuqaa(User, Message, Messagedb) ->
+	Messagedb ! {read, {User, Message}, self()},
+
+	receive
+	      {removed, Usr, Msg} ->
+	      	     io:format("Received: ~p: ~p", [Usr, Msg])
+	end.
+
 %% messagespace -- The underlying Tuple Space
 %% -> Add a message ( {User, Message} ), 
 %% -> Remove a message ( {User, Message} ),
@@ -84,6 +96,10 @@ messagespace(Messages) ->
 %	     	  io:format(" ~w ~n ", [Messages]),
 		  messagespace(Messages--[{User,Message}]);
 
+	    {read, {User, Message}, Sender } ->
+	    	  Sender ! {removed, User, Message }, 
+		  messagespace(Messages--[{User,Message}]);
+
 	    {retrieve, {User} } ->
 	    	  io:format("~w posted the following messages: ~n~p~n~n", [User,[X || {Y, X} <- Messages, Y =:= User]]),
 		  messagespace(Messages);
@@ -93,7 +109,7 @@ messagespace(Messages) ->
 		  messagespace(Messages);
 
 	    {status} ->
-	    	  io:format("~nMessages recieved: ~p~n", [len(Messages)]),
+	    	  io:format("~nMessages recieved: ~w~n", [length(Messages)]),
 		  messagespace(Messages);
 
 	    {exit} -> done
