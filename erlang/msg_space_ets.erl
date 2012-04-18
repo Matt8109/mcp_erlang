@@ -1,7 +1,7 @@
 -module(msg_space_ets).
 
 %% -compile(export_all).
--export([go/0,fireupdates/4]).
+-export([go/0,fireupdates/6]).
 
 -author("Saksena,Mancuso").
 
@@ -14,17 +14,16 @@ intro() ->
 	io:format("Distributed Computing -- Spring 2012, Lerner~n~n").
 
 runsimulation() ->
-	%Messagedb = spawn_link ( msg_space_ets, 
-	Messagedb = ets:new(messagedb, [bag, {write_concurrency}]),
+	Messagedb = ets:new(mdb, [bag,public,named_table]),
 
-	ets:insert(Messagedb, {test, test}),
+	{_, S, M} = now(),
 
-	spawn( msg_space_ets, fireupdates, [abhishek, 32,  82, Messagedb] ),
-	spawn( msg_space_ets, fireupdates, [matthew , 52, 102, Messagedb] ),
-	spawn( msg_space_ets, fireupdates, [draper  , 76, 126, Messagedb] ),
-	spawn( msg_space_ets, fireupdates, [durden  , 46,  96, Messagedb] ),
-	spawn( msg_space_ets, fireupdates, [bond    , 60, 110, Messagedb] ),
-	spawn( msg_space_ets, fireupdates, [bourne  , 68, 118, Messagedb] ),
+	spawn( msg_space_ets, fireupdates, [abhishek, 32,  82, Messagedb,S,M] ),
+	spawn( msg_space_ets, fireupdates, [matthew , 52, 102, Messagedb,S,M] ),
+	spawn( msg_space_ets, fireupdates, [draper  , 76, 126, Messagedb,S,M] ),
+	spawn( msg_space_ets, fireupdates, [durden  , 46,  96, Messagedb,S,M] ),
+	spawn( msg_space_ets, fireupdates, [bond    , 60, 110, Messagedb,S,M] ),
+	spawn( msg_space_ets, fireupdates, [bourne  , 68, 118, Messagedb,S,M] ),
 
 	io:format(" - Updates Spawned - ~n", []),
 
@@ -32,7 +31,7 @@ runsimulation() ->
 
 	io:format("~nMessages recieved: ~p~n", [ets:info(Messagedb, size)]),
 
-	ets:lookup(Messagedb, bourne),
+	%%ets:lookup(Messagedb, bourne),
 
 	io:format(" - Simulation Completed - ~n", []).
 
@@ -43,21 +42,25 @@ takelong(Start, End) ->
 	takelong(Start+1,End).
 
 %% Send out updates, and removals
-fireupdates(User, End,   End, Messagedb) -> 
-	undoupdates(User, End-50, End, Messagedb);
-fireupdates(User, Count, End, Messagedb) ->
+fireupdates(User, End,   End, Messagedb, S, M) -> 
+	undoupdates(User, End-50, End, Messagedb, S, M);
+fireupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
 	      % Welcome + Count
 	      ets:insert(Messagedb, {User, [87,101,108,99,111,109,101,95,Count]}),
-	      fireupdates(User, Count+1, End, Messagedb)
+	      fireupdates(User, Count+1, End, Messagedb, S, M)
 	end.
 
-undoupdates(_User, End,   End, _Messagedb) -> done;
-undoupdates(User, Count, End, Messagedb) ->
+undoupdates(_User, End,   End, _Messagedb, S, M) ->
+	{_, Ss, Mm} = now(),
+	io:format("~w last post: ~w, ~w~n", [_User,Ss-S,Mm-M]),
+	done;
+
+undoupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
 	      % Welcome + Count
-	      ets:delete(Messagedb, {User, [87,101,108,99,111,109,101,95,Count]}),
-	      undoupdates(User, Count+2, End, Messagedb)
+	      ets:match_delete(Messagedb, {User, [87,101,108,99,111,109,101,95,Count]}),
+	      undoupdates(User, Count+2, End, Messagedb, S, M)
 	end.
