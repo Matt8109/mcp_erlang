@@ -4,7 +4,7 @@
 %% -export([messagespace/3]).
 %% -compile([debug_info,export_all]).
 %% -compile(export_all).
--export([go/0,messagespace/1,fireupdates/4]).
+-export([go/0,messagespace/1,fireupdates/6]).
 
 -author("Saksena,Mancuso").
 
@@ -19,12 +19,14 @@ intro() ->
 runsimulation() ->
         Messagedb = spawn_link (msg_space, messagespace, [ [] ]),
 
-	spawn( msg_space, fireupdates, [abhishek, 32,  82, Messagedb] ),
-	spawn( msg_space, fireupdates, [matthew , 52, 102, Messagedb] ),
-	spawn( msg_space, fireupdates, [draper  , 76, 126, Messagedb] ),
-	spawn( msg_space, fireupdates, [durden  , 46,  96, Messagedb] ),
-	spawn( msg_space, fireupdates, [bond    , 60, 110, Messagedb] ),
-	spawn( msg_space, fireupdates, [bourne  , 68, 118, Messagedb] ),
+	{_, S, M} = now(),
+
+	spawn( msg_space, fireupdates, [abhishek, 32,  82, Messagedb,S,M] ),
+	spawn( msg_space, fireupdates, [matthew , 52, 102, Messagedb,S,M] ),
+	spawn( msg_space, fireupdates, [draper  , 76, 126, Messagedb,S,M] ),
+	spawn( msg_space, fireupdates, [durden  , 46,  96, Messagedb,S,M] ),
+	spawn( msg_space, fireupdates, [bond    , 60, 110, Messagedb,S,M] ),
+	spawn( msg_space, fireupdates, [bourne  , 68, 118, Messagedb,S,M] ),
 
 	io:format(" - Updates Spawned - ~n", []),
 
@@ -37,7 +39,7 @@ runsimulation() ->
 
 %	Messagedb ! {retrieve, {abhishek}},
 %	Messagedb ! {retrieve, {matthew }},
-	Messagedb ! {retrieve, {bourne  }},
+%	Messagedb ! {retrieve, {bourne  }},
 
 	Messagedb ! {exit},
 
@@ -50,23 +52,26 @@ takelong(Start, End) ->
 	takelong(Start+1,End).
 
 %% Send out updates, and removals
-fireupdates(User, End,   End, Messagedb) -> 
-	undoupdates(User, End-50, End, Messagedb);
-fireupdates(User, Count, End, Messagedb) ->
+fireupdates(User, End,   End, Messagedb, S, M) -> 
+	undoupdates(User, End-50, End, Messagedb, S, M);
+fireupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
 	      % Welcome + Count
 	      Messagedb ! {post, {User, [87,101,108,99,111,109,101,95,Count]}},
-	      fireupdates(User, Count+1, End, Messagedb)
+	      fireupdates(User, Count+1, End, Messagedb, S, M)
 	end.
 
-undoupdates(_User, End,   End, _Messagedb) -> done;
-undoupdates(User, Count, End, Messagedb) ->
+undoupdates(_User, End,   End, _Messagedb, S, M) -> 
+	{_, Ss, Mm} = now(),
+	io:format("~w last post: ~w, ~w~n", [_User,Ss-S,Mm-M]),
+	done;
+undoupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
 	      % Welcome + Count
 	      Messagedb ! {remove, {User, [87,101,108,99,111,109,101,95,Count]}},
-	      undoupdates(User, Count+2, End, Messagedb)
+	      undoupdates(User, Count+2, End, Messagedb, S, M)
 	end.
 
 %% Test destructive read
