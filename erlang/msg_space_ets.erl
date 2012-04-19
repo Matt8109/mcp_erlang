@@ -18,11 +18,9 @@ runsimulation() ->
 
 	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
-	initiatespawn(0, 100, 0, 100, Messagedb).
+	%% (0, Number of clients, 0, Messages per Client)
+	initiatespawn(0, 5, 0, 50, Messagedb).
 
-	%spawn( msg_space_ets, fireupdates, [abhishek, 32,  82, Messagedb,S,M] ),
-	%spawn( msg_space_ets, fireupdates, [matthew , 52, 102, Messagedb,S,M] ),
-	%spawn( msg_space_ets, fireupdates, [draper  , 76, 126, Messagedb,S,M] ),
 	%io:format(" - Updates Spawned - ~n", []),
 	%takelong(1,10000000),
 	%io:format("~nMessages recieved: ~p~n", [ets:info(Messagedb, size)]),

@@ -1,8 +1,6 @@
 -module(msg_space).
 
 %% Come back and specify which to export
-%% -export([messagespace/3]).
-%% -compile([debug_info,export_all]).
 %% -compile(export_all).
 -export([go/0,messagespace/1,fireupdates/6]).
 
@@ -21,12 +19,15 @@ runsimulation() ->
 
 	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
-	initiatespawn(0, 100, 0, 100, Messagedb).
+	%% (0, Number of clients, 0, Messages per Client)
+	initiatespawn(0, 5, 0, 50, Messagedb),
 
-	%takelong(1,10000000),
+	%takelong(1,100000000),
 
 	%Messagedb ! {status},
 	%returnmessage("Bonda", "hi ", Messagedb).
+	
+	%Messagedb ! {printall},
 
 	%Messagedb ! {status},
 
@@ -36,7 +37,7 @@ runsimulation() ->
 
 	%Messagedb ! {exit},
 
-	%io:format(" - Simulation Completed - ~n", []).
+	io:format(" - Spawning Completed - ~n", []).
 
 
 %% Empty loop
@@ -57,24 +58,18 @@ initiatespawn(UsrSt, UsrFin, CharSt, CharFin, Msgdb) ->
 fireupdates(User, End,   End, Messagedb, S, M) -> 
 	undoupdates(User, 0, End, Messagedb, S, M);
 fireupdates(User, Count, End, Messagedb, S, M) ->
-	receive 
-	after 0 ->
-	      Messagedb ! {post, {User, [104, 105, Count]}},
-	      fireupdates(User, Count+1, End, Messagedb, S, M)
-	end.
+	Messagedb ! {post, {User, [104, 105, Count]}},
+	fireupdates(User, Count+1, End, Messagedb, S, M).
 
 undoupdates(User, End,   End, Messagedb, S, M) -> 
-	{_, Ss, Mm} = now(),
-	io:format("~w last post: ~ws, ~wms~n", [User,Ss-S,Mm-M]),
+	%{_, Ss, Mm} = now(),
+	%io:format("~w last post: ~ws, ~wms~n", [User,Ss-S,Mm-M]),
 	%% Careful of next line
-	Messagedb ! {status},
+	Messagedb ! {status, User, S, M},
 	done;
 undoupdates(User, Count, End, Messagedb, S, M) ->
-	receive 
-	after 0 ->
-	      Messagedb ! {remove, {User, [104, 105, Count]}},
-	      undoupdates(User, Count+2, End, Messagedb, S, M)
-	end.
+	Messagedb ! {remove, {User, [104, 105, Count]}},
+	undoupdates(User, Count+2, End, Messagedb, S, M).
 
 %% Test destructive read
 returnmessage(User, Message, Messagedb) ->
@@ -95,12 +90,9 @@ messagespace(Messages) ->
 
 	    % Formats in which we can recieve messages
 	    {post, {User, Message} } ->
-%%	          io:format(" ~w ~w ~w ", [post,User,Message]),
-%%	      	  io:format(" ~w ~n ", [Messages]),
 	    	  messagespace(Messages++[{User,Message}]);
 
 	    {remove, {User, Message} } ->
-%	     	  io:format(" ~w ~n ", [Messages]),
 		  messagespace(Messages--[{User,Message}]);
 
 	    {read, {User, Message}, Sender } ->
@@ -115,8 +107,9 @@ messagespace(Messages) ->
    	  	  io:format("~nAll Messages: ~p ~n~n", [Messages]),
 		  messagespace(Messages);
 
-	    {status} ->
-	    	  io:format("~nMessages recieved: ~w~n", [length(Messages)]),
+	    {status, User, S, M} ->
+	    	  {_,Ss, Mm} = now(),
+	    	  io:format("~w  Completed: ~ws, ~wms  Messages recieved: ~w~n", [User, Ss-S,Mm-M,length(Messages)]),
 		  messagespace(Messages);
 
 	    {exit} -> done
