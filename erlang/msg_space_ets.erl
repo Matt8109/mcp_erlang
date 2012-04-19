@@ -44,7 +44,7 @@ initiatespawn(UsrSt, UsrFin, CharSt, CharFin, Msgdb) ->
 
 %% Send out updates, and removals
 fireupdates(User, End,   End, Messagedb, S, M) -> 
-	undoupdates(User, End-50, End, Messagedb, S, M);
+	undoupdates(User, 0, End, Messagedb, S, M);
 fireupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
@@ -53,9 +53,9 @@ fireupdates(User, Count, End, Messagedb, S, M) ->
 	      fireupdates(User, Count+1, End, Messagedb, S, M)
 	end.
 
-undoupdates(User, End,   End, _Messagedb, S, M) ->
+undoupdates(User, End,   End, Messagedb, S, M) ->
 	{_, Ss, Mm} = now(),
-	io:format("~w last post: ~ws, ~wms~n", [User,Ss-S,Mm-M]),
+	io:format("~w last post: ~ws, ~wms    Messages: ~p~n", [User,Ss-S,Mm-M, ets:info(Messagedb, size)]),
 	done;
 
 undoupdates(User, Count, End, Messagedb, S, M) ->

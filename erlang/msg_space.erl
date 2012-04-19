@@ -63,9 +63,11 @@ fireupdates(User, Count, End, Messagedb, S, M) ->
 	      fireupdates(User, Count+1, End, Messagedb, S, M)
 	end.
 
-undoupdates(User, End,   End, _Messagedb, S, M) -> 
+undoupdates(User, End,   End, Messagedb, S, M) -> 
 	{_, Ss, Mm} = now(),
 	io:format("~w last post: ~ws, ~wms~n", [User,Ss-S,Mm-M]),
+	%% Careful of next line
+	Messagedb ! {status},
 	done;
 undoupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
