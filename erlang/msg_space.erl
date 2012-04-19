@@ -19,31 +19,25 @@ intro() ->
 runsimulation() ->
         Messagedb = spawn_link (msg_space, messagespace, [ [] ]),
 
-	{_, S, M} = now(),
+	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
-	spawn( msg_space, fireupdates, [abhishek, 32,  82, Messagedb,S,M] ),
-	spawn( msg_space, fireupdates, [matthew , 52, 102, Messagedb,S,M] ),
-	spawn( msg_space, fireupdates, [draper  , 76, 126, Messagedb,S,M] ),
-	spawn( msg_space, fireupdates, [durden  , 46,  96, Messagedb,S,M] ),
-	spawn( msg_space, fireupdates, [bond    , 60, 110, Messagedb,S,M] ),
-	spawn( msg_space, fireupdates, [bourne  , 68, 118, Messagedb,S,M] ),
+	initiatespawn(0, 100, 0, 100, Messagedb).
 
-	io:format(" - Updates Spawned - ~n", []),
+	%takelong(1,10000000),
 
-	takelong(1,10000000),
+	%Messagedb ! {status},
+	%returnmessage("Bonda", "hi ", Messagedb).
 
-	Messagedb ! {status},
-	bringitbackmofuqaa(bourne, "Welcome_E", Messagedb),
-
-	Messagedb ! {status},
+	%Messagedb ! {status},
 
 %	Messagedb ! {retrieve, {abhishek}},
 %	Messagedb ! {retrieve, {matthew }},
 %	Messagedb ! {retrieve, {bourne  }},
 
-	Messagedb ! {exit},
+	%Messagedb ! {exit},
 
-	io:format(" - Simulation Completed - ~n", []).
+	%io:format(" - Simulation Completed - ~n", []).
+
 
 %% Empty loop
 %% Used to stall while firing updates
@@ -51,31 +45,37 @@ takelong(End, End) -> done;
 takelong(Start, End) ->
 	takelong(Start+1,End).
 
+%% Spawn out 
+initiatespawn(UsrFin, UsrFin, _CharSt, _CharFin, _Msgdb) -> done;
+initiatespawn(UsrSt, UsrFin, CharSt, CharFin, Msgdb) -> 
+	{_, S, M} = now(),
+	spawn(msg_space, fireupdates, [[66,111,110,100,UsrSt], CharSt, CharFin, Msgdb,S,M] ),
+	initiatespawn(UsrSt+1, UsrFin, CharSt, CharFin, Msgdb). 
+
+
 %% Send out updates, and removals
 fireupdates(User, End,   End, Messagedb, S, M) -> 
-	undoupdates(User, End-50, End, Messagedb, S, M);
+	undoupdates(User, 0, End, Messagedb, S, M);
 fireupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
-	      % Welcome + Count
-	      Messagedb ! {post, {User, [87,101,108,99,111,109,101,95,Count]}},
+	      Messagedb ! {post, {User, [104, 105, Count]}},
 	      fireupdates(User, Count+1, End, Messagedb, S, M)
 	end.
 
-undoupdates(_User, End,   End, _Messagedb, S, M) -> 
+undoupdates(User, End,   End, _Messagedb, S, M) -> 
 	{_, Ss, Mm} = now(),
-	io:format("~w last post: ~w, ~w~n", [_User,Ss-S,Mm-M]),
+	io:format("~w last post: ~ws, ~wms~n", [User,Ss-S,Mm-M]),
 	done;
 undoupdates(User, Count, End, Messagedb, S, M) ->
 	receive 
 	after 0 ->
-	      % Welcome + Count
-	      Messagedb ! {remove, {User, [87,101,108,99,111,109,101,95,Count]}},
+	      Messagedb ! {remove, {User, [104, 105, Count]}},
 	      undoupdates(User, Count+2, End, Messagedb, S, M)
 	end.
 
 %% Test destructive read
-bringitbackmofuqaa(User, Message, Messagedb) ->
+returnmessage(User, Message, Messagedb) ->
 	Messagedb ! {read, {User, Message}, self()},
 
 	receive
