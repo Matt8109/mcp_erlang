@@ -1,8 +1,5 @@
 -module(msg_space).
--compile(export_all).
 
-%% Come back and specify which to export
-%% -compile(export_all).
 -export([go/0,messagespace/1,fireupdates/6]).
 
 -author("Saksena,Mancuso").
@@ -20,34 +17,20 @@ runsimulation() ->
 
 	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
-	%% (0, Number of clients, 0, Messages per Client)
-	initiatespawn(0, 5, 0, 50, Messagedb),
-
-	%takelong(1,100000000),
-
-	%Messagedb ! {status},
-	%returnmessage("Bonda", "hi ", Messagedb).
+	%% Params: (0, Number of clients, 0, Messages per Client)
+	initiatespawn(0, 6, 0, 50, Messagedb),
 	
-	%Messagedb ! {printall},
-
-	%Messagedb ! {status},
-
-%	Messagedb ! {retrieve, {abhishek}},
-%	Messagedb ! {retrieve, {matthew }},
-%	Messagedb ! {retrieve, {bourne  }},
-
+	% Simple message return test
+	%returnmessage("Bonda", "hi ", Messagedb).
 	%Messagedb ! {exit},
 
 	io:format(" - Spawning Completed - ~n", []).
 
-
-%% Empty loop
-%% Used to stall while firing updates
-takelong(End, End) -> done;
-takelong(Start, End) ->
-	takelong(Start+1,End).
-
-%% Spawn out 
+%% Spawn out clients 
+%% UsrSt, UsrFin  : User number start, finish 
+%% 	  	    (so (0, 6) makes 6 clients)
+%% CharSt, CharFin: Message number start, finish 
+%% 	   	    (so (0, 10) sends 10 messages per client 
 initiatespawn(UsrFin, UsrFin, _CharSt, _CharFin, _Msgdb) -> done;
 initiatespawn(UsrSt, UsrFin, CharSt, CharFin, Msgdb) -> 
 	{_, S, M} = now(),

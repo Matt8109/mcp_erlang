@@ -17,22 +17,16 @@ runsimulation() ->
 
 	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
-	%% (0, Number of clients, 0, Messages per Client)
-	initiatespawn(0, 5, 0, 50, Messagedb).
+	%% Params: (0, Number of clients, 0, Messages per Client)
+	initiatespawn(0, 6, 0, 50, Messagedb),
 
-	%io:format(" - Updates Spawned - ~n", []),
-	%takelong(1,10000000),
-	%io:format("~nMessages recieved: ~p~n", [ets:info(Messagedb, size)]),
-	%%ets:lookup(Messagedb, bourne),
-	%io:format(" - Simulation Completed - ~n", []).
+	io:format(" - Spawning Completed - ~n", []).
 
-%% Empty loop
-%% Used to stall while firing updates
-takelong(End, End) -> done;
-takelong(Start, End) ->
-	takelong(Start+1,End).
-
-%% Spawn out 
+%% Spawn out clients 
+%% UsrSt, UsrFin  : User number start, finish 
+%% 	  	    (so (0, 6) makes 6 clients)
+%% CharSt, CharFin: Message number start, finish 
+%% 	   	    (so (0, 10) sends 10 messages per client 
 initiatespawn(UsrFin, UsrFin, _CharSt, _CharFin, _Msgdb) -> done;
 initiatespawn(UsrSt, UsrFin, CharSt, CharFin, Msgdb) -> 
 	{_, S, M} = now(),
