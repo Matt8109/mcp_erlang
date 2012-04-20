@@ -1,1 +1,30 @@
-Baby you light up my world like nobody else
+Abhishek Saksena 
+Matthew Mancuso
+April 19, 2012
+
+
+Please see Project Abstract.docx for information about our project.
+
+Program Explanations 
+---------------------
+helloworld.erl - A simple message passing example in erlang.
+
+messageordering.erl - Shows how erlang programs can force the order of operations by
+selecting messages in a specific order.
+
+msg_space(_ets).erl - Two files. The first contains our implementation of a tuple space.
+The second contains the same test but using Erlang's built in data structure that was
+similar called the Erlang Term Storage.  Both run the same benchmark.
+
+Running Programs
+---------------------
+To run a program in Erlang, start up the Erlang shell by typing 'erl'
+
+To compile, type c(module_name).  The file name is the module name without the .erl file 
+extension. Please note, you NEED the period after the parenthesis!
+
+To run the program type:
+module_name:go().
+
+go() is the function name you wish to call. For all of our files we have named the
+main method go().
