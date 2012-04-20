@@ -1,18 +1,16 @@
 using System;
+using System.Collections;
 
 namespace TupleSpace
 {
 	public class Tuple
 	{
-		private Object data;
-		private Type objectType;
-		
-		public Tuple ()
-		{
-			
+	
+		public Tuple() { 
 		}
 		
-		public 
+		public String Atom {get;set;}
+		public Object Data {get ;set;}
 	}
 }
 
