@@ -52,7 +52,7 @@ fireupdates(User, Count, End, Messagedb, S, M) ->
 
 undoupdates(User, End,   End, Messagedb, S, M) ->
 	{_, Ss, Mm} = now(),
-	io:format("~w last post: ~ws, ~wms    Messages: ~p~n", [User,Ss-S,Mm-M, ets:info(Messagedb, size)]),
+	io:format("~w last post: ~wms    Messages: ~p~n", [User,(Ss-S)*1000000+(Mm-M), ets:info(Messagedb, size)]),
 	done;
 
 undoupdates(User, Count, End, Messagedb, S, M) ->
