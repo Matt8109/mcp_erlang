@@ -110,7 +110,7 @@ messagespace(Messages) ->
 
 	    {status, User, S, M} ->
 	    	  {_,Ss, Mm} = now(),
-	    	  io:format("~w  Completed: ~ws, ~wms  Messages recieved: ~w~n", [User, Ss-S,Mm-M,length(Messages)]),
+	    	  io:format("~w  Completed: ~wms  Messages recieved: ~w~n", [User, (Ss-S)*1000000+(Mm-M),length(Messages)]),
 		  messagespace(Messages);
 
 	    {exit} -> done
