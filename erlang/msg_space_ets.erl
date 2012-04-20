@@ -1,6 +1,5 @@
 -module(msg_space_ets).
 
-%% -compile(export_all).
 -export([go/0,fireupdates/6]).
 
 -author("Saksena,Mancuso").

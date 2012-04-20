@@ -1,4 +1,5 @@
 -module(msg_space).
+-compile(export_all).
 
 %% Come back and specify which to export
 %% -compile(export_all).
