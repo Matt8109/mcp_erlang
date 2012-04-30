@@ -1,25 +1,25 @@
 -module(msg_space_ets).
 
--export([go/0,fireupdates/6]).
+-export([go/2,fireupdates/6]).
 
 -author("Saksena,Mancuso").
 
-go() ->
+go(Clients, Messages) ->
      intro(),
-     runsimulation().
+     runsimulation(Clients, Messages).
 
 intro() ->
 	io:format("Abhishek Saksena && Matthew Mancuso~n"),
 	io:format("Distributed Computing -- Spring 2012, Lerner~n~n").
 
-runsimulation() ->
+runsimulation(Clients, Messages) ->
 	Messagedb = ets:new(mdb, [bag,public,named_table]),
 
 	io:format(" - Client Spawning Initiated -  ~n~n", []),
 
 	{_, S, M} = now(),
 	%% Params: (0, Number of clients, 0, Messages per Client)
-	initiatespawn(0, 6, 0, 10, Messagedb, S, M),
+	initiatespawn(0, Clients, 0, Messages, Messagedb, S, M),
 
 	io:format(" - Spawning Completed - ~n", []).
 
